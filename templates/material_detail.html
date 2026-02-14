@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}{{ material.title }} - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Domov</a></li>
+            {% if material.category %}
+            <li class="breadcrumb-item"><a href="{{ url_for('category', slug=material.category.slug) }}">{{ material.category.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ material.title[:30] }}...</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                {% if material.preview_image %}
+                <img src="{{ url_for('static', filename='uploads/' + material.preview_image) }}" class="card-img-top" style="max-height: 400px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                    <i class="bi bi-file-earmark-text" style="font-size: 5rem;"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h2>{{ material.title }}</h2>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="rating me-2">
+                            {% for i in range(5) %}
+                            <i class="bi bi-star{% if i < material.rating|int %}-fill{% endif %}"></i>
+                            {% endfor %}
+                        </span>
+                        <span class="text-muted">{{ "%.1f"|format(material.rating) }} ({{ material.rating_count }} hodnotení)</span>
+                        <span class="ms-3 text-muted"><i class="bi bi-eye"></i> {{ material.views }} zobrazení</span>
+                        <span class="ms-3 text-muted"><i class="bi bi-download"></i> {{ material.downloads }} stiahnutí</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Popis</h5>
+                    <p>{{ material.description }}</p>
+                    
+                    <hr>
+                    
+                    <div class="row text-muted">
+                        <div class="col-md-6">
+                            <p><strong>Kategória:</strong> {{ material.category.name if material.category else 'Nezaradené' }}</p>
+                            <p><strong>Kód predmetu:</strong> {{ material.course_code or '-' }}</p>
+                            <p><strong>Predmet:</strong> {{ material.subject or '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Univerzita:</strong> {{ material.university or '-' }}</p>
+                            <p><strong>Typ súboru:</strong> {{ material.file_type|upper }}</p>
+                            <p><strong>Veľkosť:</strong> {{ "%.2f"|format(material.file_size / 1024 / 1024) }} MB</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Hodnotenia ({{ material.reviews.count() }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if material.reviews.all() %}
+                    {% for review in material.reviews.all() %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>{{ review.reviewer.username }}</strong>
+                                <span class="rating ms-2">
+                                    {% for i in range(5) %}
+                                    <i class="bi bi-star{% if i < review.rating %}-fill{% endif %}"></i>
+                                    {% endfor %}
+                                </span>
+                            </div>
+                            <small class="text-muted">{{ review.created_at.strftime('%d.%m.%Y') }}</small>
+                        </div>
+                        {% if review.comment %}
+                        <p class="mt-2 mb-0">{{ review.comment }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">Zatiaľ žiadne hodnotenia.</p>
+                    {% endif %}
+                    
+                    {% if current_user.is_authenticated and has_purchased %}
+                    <hr>
+                    <h6>Pridať hodnotenie</h6>
+                    <form method="POST" action="{{ url_for('add_review', id=material.id) }}">
+                        <div class="mb-3">
+                            <label class="form-label">Hodnotenie</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="5">5 - Výborné</option>
+                                <option value="4">4 - Veľmi dobré</option>
+                                <option value="3">3 - Dobré</option>
+                                <option value="2">2 - Slabé</option>
+                                <option value="1">1 - Zlé</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Komentár (voliteľné)</label>
+                            <textarea name="comment" class="form-control" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-orange">Odoslať hodnotenie</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Purchase Card -->
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <span class="price" style="font-size: 2.5rem;">€{{ "%.2f"|format(material.price) }}</span>
+                    </div>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if has_purchased %}
+                        <a href="{{ url_for('download_material', material_id=material.id) }}" class="btn btn-success w-100 mb-2">
+                            <i class="bi bi-download"></i> Stiahnuť
+                        </a>
+                        {% elif material.seller_id == current_user.id %}
+                        <a href="{{ url_for('edit_material', id=material.id) }}" class="btn btn-outline-secondary w-100 mb-2">
+                            <i class="bi bi-pencil"></i> Upraviť
+                        </a>
+                        {% else %}
+                        <form action="{{ url_for('add_to_cart', material_id=material.id) }}" method="POST">
+                            <button type="submit" class="btn btn-orange w-100 mb-2">
+                                <i class="bi bi-cart-plus"></i> Pridať do košíka
+                            </button>
+                        </form>
+                        <form action="{{ url_for('toggle_favorite', material_id=material.id) }}" method="POST">
+                            <button type="submit" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-heart{% if material in current_user.favorite_materials %}-fill{% endif %}"></i>
+                                {{ 'Odstrániť z obľúbených' if material in current_user.favorite_materials else 'Pridať do obľúbených' }}
+                            </button>
+                        </form>
+                        {% endif %}
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-orange w-100">
+                        Prihláste sa pre nákup
+                    </a>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <!-- Seller Info -->
+                    <div class="text-center">
+                        <i class="bi bi-person-circle fs-1 text-muted"></i>
+                        <h6 class="mt-2">{{ material.seller.username }}</h6>
+                        {% if material.seller.is_verified %}
+                        <span class="badge bg-success"><i class="bi bi-patch-check"></i> Overený predajca</span>
+                        {% endif %}
+                        <p class="text-muted small mt-2">
+                            {{ material.seller.materials.count() }} materiálov<br>
+                            <span class="rating">
+                                {% for i in range(5) %}
+                                <i class="bi bi-star{% if i < material.seller.seller_rating|int %}-fill{% endif %}"></i>
+                                {% endfor %}
+                            </span>
+                        </p>
+                        <a href="{{ url_for('seller_profile', id=material.seller.id) }}" class="btn btn-sm btn-outline-secondary">
+                            Zobraziť profil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Materials -->
+    {% if related %}
+    <div class="mt-5">
+        <h4>Podobné materiály</h4>
+        <div class="row g-4">
+            {% for item in related %}
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6>{{ item.title[:40] }}...</h6>
+                        <p class="text-muted small">{{ item.category.name if item.category else '' }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€{{ "%.2f"|format(item.price) }}</span>
+                            <a href="{{ url_for('material_detail', id=item.id) }}" class="btn btn-sm btn-outline-secondary">Zobraziť</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

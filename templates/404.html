@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}404 - Stránka nenájdená{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center">
+        <h1 style="font-size: 8rem; font-weight: bold; color: #e86c25;">404</h1>
+        <h2>Stránka nenájdená</h2>
+        <p class="text-muted">Oops! Stránka, ktorú hľadáte, neexistuje.</p>
+        <a href="{{ url_for('home') }}" class="btn btn-orange btn-lg mt-3">
+            <i class="bi bi-house"></i> Späť na domovskú stránku
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Registrácia - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Registrácia</h2>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Používateľské meno</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Heslo</label>
+                            <input type="password" class="form-control" name="password" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Potvrdiť heslo</label>
+                            <input type="password" class="form-control" name="confirm_password" required>
+                        </div>
+                        <button type="submit" class="btn btn-orange w-100 py-2">Registrovať sa</button>
+                    </form>
+                    <p class="text-center mt-4 mb-0">
+                        Už máte účet? <a href="{{ url_for('login') }}" class="text-orange">Prihláste sa</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

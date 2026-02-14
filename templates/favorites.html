@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Obľúbené - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2><i class="bi bi-heart"></i> Obľúbené materiály</h2>
+    
+    {% if favorites %}
+    <div class="row g-4 mt-3">
+        {% for material in favorites %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                {% if material.preview_image %}
+                <img src="{{ url_for('static', filename='uploads/' + material.preview_image) }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                    <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h6 class="card-title">{{ material.title[:50] }}{% if material.title|length > 50 %}...{% endif %}</h6>
+                    <p class="text-muted small mb-2">
+                        <i class="bi bi-folder"></i> {{ material.category.name if material.category else 'Bez kategórie' }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="price fs-5">€{{ "%.2f"|format(material.price) }}</span>
+                        <div>
+                            <form action="{{ url_for('toggle_favorite', material_id=material.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Odstrániť z obľúbených">
+                                    <i class="bi bi-heart-fill"></i>
+                                </button>
+                            </form>
+                            <a href="{{ url_for('material_detail', id=material.id) }}" class="btn btn-sm btn-orange">Zobraziť</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-heart" style="font-size: 4rem;"></i>
+        <h4 class="mt-3">Žiadne obľúbené materiály</h4>
+        <p class="text-muted">Pridajte materiály do obľúbených kliknutím na srdce.</p>
+        <a href="{{ url_for('browse') }}" class="btn btn-orange">Prehľadávať materiály</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

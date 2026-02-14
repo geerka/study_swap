@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Prehľadávať materiály - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-funnel"></i> Filtre
+                </div>
+                <div class="card-body">
+                    <form method="GET">
+                        {% if search_query %}
+                        <input type="hidden" name="q" value="{{ search_query }}">
+                        {% endif %}
+                        
+                        <h6>Kategória</h6>
+                        <select name="category" class="form-select mb-3">
+                            <option value="">Všetky kategórie</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.slug }}" {{ 'selected' if current_category == cat.slug }}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                        <h6>Cenový rozsah</h6>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <input type="number" class="form-control" name="min_price" placeholder="Od €" value="{{ request.args.get('min_price', '') }}">
+                            </div>
+                            <div class="col">
+                                <input type="number" class="form-control" name="max_price" placeholder="Do €" value="{{ request.args.get('max_price', '') }}">
+                            </div>
+                        </div>
+                        
+                        <h6>Typ súboru</h6>
+                        <select name="file_type" class="form-select mb-3">
+                            <option value="">Všetky typy</option>
+                            <option value="pdf" {{ 'selected' if request.args.get('file_type') == 'pdf' }}>PDF</option>
+                            <option value="zip" {{ 'selected' if request.args.get('file_type') == 'zip' }}>ZIP</option>
+                            <option value="pptx" {{ 'selected' if request.args.get('file_type') == 'pptx' }}>PowerPoint</option>
+                            <option value="docx" {{ 'selected' if request.args.get('file_type') == 'docx' }}>Word</option>
+                        </select>
+                        
+                        <button type="submit" class="btn btn-orange w-100">Filtrovať</button>
+                        <a href="{{ url_for('browse') }}" class="btn btn-outline-secondary w-100 mt-2">Vyčistiť filtre</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Materials Grid -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>
+                    {% if search_query %}
+                    Výsledky pre "{{ search_query }}"
+                    {% else %}
+                    Všetky materiály
+                    {% endif %}
+                    <small class="text-muted">({{ materials.total }} položiek)</small>
+                </h4>
+                <div>
+                    <select class="form-select" onchange="window.location.href=this.value">
+                        <option value="{{ url_for('browse', q=search_query, category=current_category, sort='newest') }}" {{ 'selected' if sort_by == 'newest' }}>Najnovšie</option>
+                        <option value="{{ url_for('browse', q=search_query, category=current_category, sort='popular') }}" {{ 'selected' if sort_by == 'popular' }}>Najpopulárnejšie</option>
+                        <option value="{{ url_for('browse', q=search_query, category=current_category, sort='price_low') }}" {{ 'selected' if sort_by == 'price_low' }}>Cena: nízka-vysoká</option>
+                        <option value="{{ url_for('browse', q=search_query, category=current_category, sort='price_high') }}" {{ 'selected' if sort_by == 'price_high' }}>Cena: vysoká-nízka</option>
+                        <option value="{{ url_for('browse', q=search_query, category=current_category, sort='rating') }}" {{ 'selected' if sort_by == 'rating' }}>Najlepšie hodnotené</option>
+                    </select>
+                </div>
+            </div>
+            
+            {% if materials.items %}
+            <div class="row g-4">
+                {% for material in materials.items %}
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        {% if material.preview_image %}
+                        <img src="{{ url_for('static', filename='uploads/' + material.preview_image) }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                            <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ material.title[:50] }}{% if material.title|length > 50 %}...{% endif %}</h6>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-folder"></i> {{ material.category.name if material.category else 'Bez kategórie' }}
+                            </p>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="rating me-1">
+                                    {% for i in range(5) %}
+                                    <i class="bi bi-star{% if i < material.rating|int %}-fill{% endif %}"></i>
+                                    {% endfor %}
+                                </span>
+                                <small class="text-muted">({{ material.rating_count }})</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price fs-5">€{{ "%.2f"|format(material.price) }}</span>
+                                <a href="{{ url_for('material_detail', id=material.id) }}" class="btn btn-sm btn-orange">Zobraziť</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if materials.pages > 1 %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if materials.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('browse', page=materials.prev_num, q=search_query, category=current_category, sort=sort_by) }}">Predchádzajúca</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page in materials.iter_pages() %}
+                    {% if page %}
+                    <li class="page-item {{ 'active' if page == materials.page }}">
+                        <a class="page-link" href="{{ url_for('browse', page=page, q=search_query, category=current_category, sort=sort_by) }}">{{ page }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if materials.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('browse', page=materials.next_num, q=search_query, category=current_category, sort=sort_by) }}">Ďalšia</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-search fs-1 text-muted"></i>
+                <h5 class="mt-3">Žiadne materiály nenájdené</h5>
+                <p class="text-muted">Skúste zmeniť filtre alebo hľadaný výraz.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block title %}StudySwap - Premeň svoje poznámky na príjem{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                    url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200') center/cover;
+        padding: 80px 0;
+        color: white;
+        text-align: center;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .hero-section p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+    }
+    
+    .stats-row {
+        margin-top: 50px;
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-item .number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #ffc107;
+    }
+    
+    .stat-item .label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    /* Category Cards */
+    .category-card {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 30px 20px;
+        text-align: center;
+        transition: all 0.3s;
+        background: white;
+    }
+    
+    .category-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+    }
+    
+    .category-card i {
+        font-size: 2.5rem;
+        color: var(--primary-orange);
+        margin-bottom: 15px;
+    }
+    
+    .category-card h5 {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .category-card .count {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    /* How It Works */
+    .how-it-works {
+        background: #f9f9f9;
+        padding: 60px 0;
+    }
+    
+    .step-card {
+        text-align: center;
+        padding: 30px;
+    }
+    
+    .step-card .step-number {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-orange);
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    
+    .step-card h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    /* Material Cards */
+    .material-card {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+    
+    .material-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .material-card .badge-featured {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: var(--primary-orange);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+    
+    .material-card img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+    }
+    
+    .material-card .card-body {
+        padding: 20px;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, #e86c25, #ff8a50);
+        padding: 60px 0;
+        color: white;
+        text-align: center;
+    }
+    
+    .cta-section h2 {
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .cta-section .btn-light {
+        padding: 12px 40px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1>Premeň svoje študijné poznámky na príjem<br>alebo nakúp materiály od najlepších študentov</h1>
+        <p>Pripoj sa k {{ total_sellers }}+ študentom, ktorí zarábajú na svojich poznámkach.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('sell') }}" class="btn btn-orange btn-lg">Začať predávať</a>
+            <a href="{{ url_for('browse') }}" class="btn btn-outline-light btn-lg">Prehľadávať materiály</a>
+        </div>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="number">{{ total_materials }}+</div>
+                <div class="label">Materiálov</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">{{ total_sellers }}+</div>
+                <div class="label">Predajcov</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">4.8</div>
+                <div class="label">Priemerné hodnotenie</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="py-4 bg-white border-bottom">
+    <div class="container">
+        <form action="{{ url_for('search') }}" method="GET">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="input-group input-group-lg">
+                        <input type="text" class="form-control" name="q" placeholder="Hľadať podľa predmetu, kurzu alebo univerzity...">
+                        <button class="btn btn-orange" type="submit">
+                            <i class="bi bi-search"></i> Hľadať
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <h3 class="text-center mb-4">Obľúbené kategórie</h3>
+        <div class="row g-4">
+            {% for cat in categories %}
+            <div class="col-md-4 col-lg-2">
+                <a href="{{ url_for('category', slug=cat.slug) }}" class="text-decoration-none">
+                    <div class="category-card">
+                        <i class="{{ cat.icon or 'bi bi-folder' }}"></i>
+                        <h5>{{ cat.name }}</h5>
+                        <div class="count">{{ cat.materials.count() }} položiek</div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works">
+    <div class="container">
+        <h3 class="text-center mb-5">Ako to funguje</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h5>Pre predajcov</h5>
+                    <p class="text-muted">Nahrajte svoje poznámky, nastavte cenu a začnite zarábať. Z každého predaja získate 80%.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h5>Pre kupujúcich</h5>
+                    <p class="text-muted">Prehľadávajte tisíce materiálov, prečítajte si hodnotenia a vyberte si najlepšie.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h5>Okamžité stiahnutie</h5>
+                    <p class="text-muted">Po zakúpení je materiál ihneď dostupný na stiahnutie. Bez čakania.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Materials -->
+{% if featured_materials %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Odporúčané materiály</h3>
+            <a href="{{ url_for('browse') }}" class="text-orange">Zobraziť všetky →</a>
+        </div>
+        <div class="row g-4">
+            {% for material in featured_materials %}
+            <div class="col-md-4 col-lg-3">
+                <div class="material-card position-relative">
+                    <span class="badge-featured">Odporúčané</span>
+                    {% if material.preview_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + material.preview_image) }}" alt="{{ material.title }}">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 160px;">
+                        <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="mb-1">{{ material.title[:40] }}{% if material.title|length > 40 %}...{% endif %}</h6>
+                        <p class="text-muted small mb-2">{{ material.category.name if material.category else '' }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price fs-5">€{{ "%.2f"|format(material.price) }}</span>
+                            <a href="{{ url_for('material_detail', id=material.id) }}" class="btn btn-sm btn-orange">Zobraziť</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Recent Materials -->
+{% if recent_materials %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Najnovšie materiály</h3>
+            <a href="{{ url_for('browse', sort='newest') }}" class="text-orange">Zobraziť všetky →</a>
+        </div>
+        <div class="row g-4">
+            {% for material in recent_materials %}
+            <div class="col-md-4 col-lg-3">
+                <div class="card h-100">
+                    {% if material.preview_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + material.preview_image) }}" class="card-img-top" style="height: 140px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-white d-flex align-items-center justify-content-center" style="height: 140px;">
+                        <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title">{{ material.title[:35] }}{% if material.title|length > 35 %}...{% endif %}</h6>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-folder"></i> {{ material.category.name if material.category else '' }}
+                        </p>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="rating me-1">
+                                {% for i in range(5) %}
+                                <i class="bi bi-star{% if i < material.rating|int %}-fill{% endif %}"></i>
+                                {% endfor %}
+                            </span>
+                            <small class="text-muted">({{ material.rating_count }})</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€{{ "%.2f"|format(material.price) }}</span>
+                            <a href="{{ url_for('material_detail', id=material.id) }}" class="btn btn-sm btn-outline-secondary">Zobraziť</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Pripravený začať zarábať?</h2>
+        <p class="mb-4">Nahrajte svoje poznámky a začnite zarábať ešte dnes.</p>
+        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">Zaregistrovať sa zadarmo</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Predať materiál - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-upload"></i> Predať nový materiál</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Názov materiálu *</label>
+                            <input type="text" class="form-control" name="title" required maxlength="200" placeholder="napr. CCNA Complete Study Guide">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Popis *</label>
+                            <textarea class="form-control" name="description" rows="5" required placeholder="Popíšte obsah materiálu, pre koho je určený, čo sa z neho študent naučí..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Cena (€) *</label>
+                                <input type="number" step="0.01" min="0.50" class="form-control" name="price" required placeholder="5.99">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kategória *</label>
+                                <select class="form-select" name="category_id" required>
+                                    <option value="">Vyberte kategóriu</option>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Kód predmetu</label>
+                                <input type="text" class="form-control" name="course_code" placeholder="napr. CS101">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Predmet</label>
+                                <input type="text" class="form-control" name="subject" placeholder="napr. Programovanie">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Univerzita</label>
+                                <input type="text" class="form-control" name="university" placeholder="napr. STU Bratislava">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Súbor materiálu *</label>
+                            <input type="file" class="form-control" name="file" required accept=".pdf,.zip,.pptx,.docx,.txt">
+                            <small class="text-muted">Povolené formáty: PDF, ZIP, PPTX, DOCX, TXT (max 50MB)</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Náhľadový obrázok (voliteľné)</label>
+                            <input type="file" class="form-control" name="preview" accept=".png,.jpg,.jpeg">
+                            <small class="text-muted">Odporúčaná veľkosť: 800x600px</small>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Po úspešnom nahratí bude váš materiál dostupný na predaj. Z každého predaja získate 80% z ceny.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-orange btn-lg w-100">
+                            <i class="bi bi-upload"></i> Nahrať materiál
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

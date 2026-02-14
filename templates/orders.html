@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Moje objednávky - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2><i class="bi bi-bag"></i> Moje objednávky</h2>
+    
+    {% if orders %}
+    <div class="mt-4">
+        {% for order in orders %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Objednávka {{ order.order_number }}</strong>
+                    <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' }} ms-2">
+                        {{ 'Dokončená' if order.status == 'completed' else 'Čaká' }}
+                    </span>
+                </div>
+                <small class="text-muted">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+            </div>
+            <div class="card-body">
+                {% for item in order.items %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <a href="{{ url_for('material_detail', id=item.material.id) }}">{{ item.material.title }}</a>
+                        <br><small class="text-muted">{{ item.material.category.name if item.material.category else '' }}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="price">€{{ "%.2f"|format(item.price) }}</span>
+                        {% if order.status == 'completed' %}
+                        <br>
+                        <a href="{{ url_for('download_material', material_id=item.material.id) }}" class="btn btn-sm btn-success">
+                            <i class="bi bi-download"></i> Stiahnuť
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <strong>Celkom</strong>
+                    <strong class="price">€{{ "%.2f"|format(order.total_amount) }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-bag-x" style="font-size: 4rem;"></i>
+        <h4 class="mt-3">Zatiaľ žiadne objednávky</h4>
+        <p class="text-muted">Po zakúpení materiálov sa tu zobrazia vaše objednávky.</p>
+        <a href="{{ url_for('browse') }}" class="btn btn-orange">Prehľadávať materiály</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

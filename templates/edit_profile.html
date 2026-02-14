@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Upraviť profil - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-person-gear"></i> Upraviť profil</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Meno</label>
+                                <input type="text" class="form-control" name="first_name" value="{{ current_user.first_name or '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Priezvisko</label>
+                                <input type="text" class="form-control" name="last_name" value="{{ current_user.last_name or '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Univerzita</label>
+                            <input type="text" class="form-control" name="university" value="{{ current_user.university or '' }}" placeholder="napr. STU Bratislava">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">O mne</label>
+                            <textarea class="form-control" name="bio" rows="4" placeholder="Napíšte niečo o sebe...">{{ current_user.bio or '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-orange">
+                                <i class="bi bi-check"></i> Uložiť zmeny
+                            </button>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Zrušiť</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

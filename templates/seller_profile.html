@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ seller.username }} - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-circle" style="font-size: 6rem; color: #ccc;"></i>
+                    <h4 class="mt-3">{{ seller.username }}</h4>
+                    {% if seller.is_verified %}
+                    <span class="badge bg-success"><i class="bi bi-patch-check"></i> Overený predajca</span>
+                    {% endif %}
+                    <hr>
+                    {% if seller.university %}
+                    <p class="small text-muted mb-1">
+                        <i class="bi bi-building"></i> {{ seller.university }}
+                    </p>
+                    {% endif %}
+                    <p class="small text-muted mb-1">
+                        <i class="bi bi-calendar"></i> Člen od {{ seller.created_at.strftime('%m/%Y') }}
+                    </p>
+                    <p class="small text-muted mb-1">
+                        <i class="bi bi-files"></i> {{ materials|length }} materiálov
+                    </p>
+                    <div class="rating mt-2">
+                        {% for i in range(5) %}
+                        <i class="bi bi-star{% if i < seller.seller_rating|int %}-fill{% endif %}"></i>
+                        {% endfor %}
+                        <span class="text-muted ms-1">{{ "%.1f"|format(seller.seller_rating) }}</span>
+                    </div>
+                    {% if seller.bio %}
+                    <hr>
+                    <p class="small text-muted">{{ seller.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <h4>Materiály od {{ seller.username }}</h4>
+            
+            {% if materials %}
+            <div class="row g-4 mt-2">
+                {% for material in materials %}
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        {% if material.preview_image %}
+                        <img src="{{ url_for('static', filename='uploads/' + material.preview_image) }}" class="card-img-top" style="height: 120px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
+                            <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ material.title[:40] }}{% if material.title|length > 40 %}...{% endif %}</h6>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-folder"></i> {{ material.category.name if material.category else '' }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price">€{{ "%.2f"|format(material.price) }}</span>
+                                <a href="{{ url_for('material_detail', id=material.id) }}" class="btn btn-sm btn-orange">Zobraziť</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-folder2-open fs-1 text-muted"></i>
+                <p class="mt-2 text-muted">Tento predajca zatiaľ nemá žiadne materiály.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

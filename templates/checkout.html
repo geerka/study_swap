@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Pokladňa - StudySwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2><i class="bi bi-credit-card"></i> Pokladňa</h2>
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Položky objednávky</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in cart_items %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 {% if not loop.last %}border-bottom{% endif %}">
+                        <div>
+                            <h6 class="mb-0">{{ item.title }}</h6>
+                            <small class="text-muted">{{ item.category.name if item.category else '' }} | {{ item.file_type|upper }}</small>
+                        </div>
+                        <span class="price">€{{ "%.2f"|format(item.price) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Platobné údaje</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Číslo karty</label>
+                            <input type="text" class="form-control" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Platnosť</label>
+                                <input type="text" class="form-control" placeholder="MM/RR" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="text" class="form-control" placeholder="123" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Meno na karte</label>
+                            <input type="text" class="form-control" placeholder="Ján Novák" required>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-shield-check"></i> Vaše platobné údaje sú zabezpečené šifrovaním.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-orange btn-lg w-100">
+                            <i class="bi bi-lock"></i> Zaplatiť €{{ "%.2f"|format(cart_total) }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5 class="mb-0">Súhrn</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Položky ({{ cart_items|length }})</span>
+                        <span>€{{ "%.2f"|format(cart_total) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Poplatky</span>
+                        <span class="text-success">€0.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Celkom</strong>
+                        <strong class="price fs-4">€{{ "%.2f"|format(cart_total) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
